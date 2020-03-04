@@ -16,7 +16,7 @@ clear all; close all; clc; load NYC_measles_counts.mat;
 x = NYC_measles_counts';
 N = length(x);
 
-% create the smoothness matrix
+% create the smoothness matrix, named H
 h = [1 -1];
 c = [h(1); zeros(N-2,1)];
 r = zeros(1,N);
@@ -33,16 +33,16 @@ for RD = MinRD:10:MaxRD
     for Shift = MinShift:2:MaxShift
         fprintf('RD = %d, Shift = %d \n', RD, Shift);
         
-        % creat an aggregation (observation) matrix
+        % creat an aggregation (observation) matrix, named O
         Overlap = RD-Shift;
         fit = 1;
         O = create_obs_matrix(N,RD,Overlap,fit);
 
         
-        % create aggregated reports from the time series x
+        % create aggregated reports from the time series x, named y
         y = O*x';
 
-        % disaggregate using the baselines H-Fuse, and Least Squares 
+        % disaggregate using the baselines H-Fuse, and Least Squares (LS) 
         x_LS  = (pinv(O)*y).';
         x_Hfuse = H_Fuse(O, y, H);
 
@@ -65,12 +65,12 @@ for RD = MinRD:10:MaxRD
                                     /max(rmse_Hfuse(RD-1,Shift),rmse_HR(RD-1,Shift));
     end  
 end  
-%% generate plots
-figure
-ConstrName = 'HomeRun vs. LS';
-plot_error_ratio(Compare_HR_LS,ConstrName);
-grid on
+%% generate plots (Fig. 9 in the paper)
 figure
 ConstrName = 'HomeRun vs. H-Fuse';
+plot_error_ratio(Compare_HR_Hfuse,ConstrName);
+grid on
+figure
+ConstrName = 'HomeRun vs. LS';
 plot_error_ratio(Compare_HR_LS,ConstrName);
 grid on

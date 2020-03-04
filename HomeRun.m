@@ -5,7 +5,7 @@ function [s, cost] = HomeRun(A, H, y, rho, lambda)
 %
 % This function solves the following problem via ADMM:
 %
-%          minimize     ||s||_1 + (lbd/2)||H*iDCT(s)||_2
+%          minimize     ||s||_1 + (lambda/2)||H*iDCT(s)||_2^2
 %          subject to   A*iDCT(s) = y
 %                       iDCT(s) > = 0
 %
@@ -51,7 +51,8 @@ for iter = 1:MAX_ITER
     r(r<0) = 0;
     % s-update (soft thresholding)
     sold = s;
-    s = sparse(max(0,(z + u3)-(1/rho)) - max(0, -(z + u3)-(1/rho)));        
+    s = sparse(max(0,(z + u3)-(1/rho)) - max(0, -(z + u3)-(1/rho)));   
+    
     %% Step 3: update the dual variables
     u1 = u1 + A*t - y;
     u2 = u2 + t - r;
@@ -69,6 +70,6 @@ end
 end
 
 
-function obj = objective(s,Hs,lbd)
-    obj = norm(s,1) +(lbd/2)*(norm(Hs*mirt_idctn(full(s)),2))^2;
+function obj = objective(s,H,lambda)
+    obj = norm(s,1) +(lambda/2)*(norm(H*mirt_idctn(full(s)),2))^2;
 end
